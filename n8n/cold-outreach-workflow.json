@@ -1,0 +1,317 @@
+{
+  "id": "biz-finder-cold-outreach-v1",
+  "name": "Nearby Business Finder - Cold Outreach",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "n1-manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-1400, 0]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "sp-lat",
+              "name": "lat",
+              "type": "number",
+              "value": 52.52
+            },
+            {
+              "id": "sp-lon",
+              "name": "lon",
+              "type": "number",
+              "value": 13.405
+            },
+            {
+              "id": "sp-radiusKm",
+              "name": "radiusKm",
+              "type": "number",
+              "value": 10
+            },
+            {
+              "id": "sp-categories",
+              "name": "categories",
+              "type": "string",
+              "value": "electrician,plumber,hvac"
+            },
+            {
+              "id": "sp-backend",
+              "name": "backendBaseUrl",
+              "type": "string",
+              "value": "http://localhost:3001"
+            },
+            {
+              "id": "sp-sender-name",
+              "name": "senderName",
+              "type": "string",
+              "value": "REPLACE_WITH_YOUR_NAME_OR_COMPANY"
+            },
+            {
+              "id": "sp-sender-address",
+              "name": "senderPhysicalAddress",
+              "type": "string",
+              "value": "REPLACE_WITH_YOUR_REAL_PHYSICAL_MAILING_ADDRESS"
+            },
+            {
+              "id": "sp-unsubscribe",
+              "name": "unsubscribeInstructions",
+              "type": "string",
+              "value": "Reply with UNSUBSCRIBE and we will not contact you again."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "n2-search-parameters",
+      "name": "Search Parameters",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-1180, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.backendBaseUrl }}/places",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ lat: $json.lat, lon: $json.lon, radiusKm: $json.radiusKm, categories: $json.categories.split(',').map(c => c.trim()) }) }}",
+        "options": {}
+      },
+      "id": "n3-fetch-businesses",
+      "name": "Fetch Nearby Businesses",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-960, 0]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "id": "n4-split-out",
+      "name": "Split Out Businesses",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [-740, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-email-cond",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "n5-has-email",
+      "name": "Has Email?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-520, 0]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "NoEmailLeads",
+          "mode": "list",
+          "cachedResultName": "NoEmailLeads"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "n6-no-email-log",
+      "name": "No-Email Leads Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-300, 180]
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "compare": "selectedFields",
+        "fieldsToCompare": {
+          "values": [
+            {
+              "field": "email"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "n7-not-already-sent",
+      "name": "Not Already Sent",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [-300, -140]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "compose-subject",
+              "name": "emailSubject",
+              "type": "string",
+              "value": "={{ 'Quick question for ' + $json.name }}"
+            },
+            {
+              "id": "compose-body",
+              "name": "emailBody",
+              "type": "string",
+              "value": "={{ 'Hi ' + $json.name + ' team,\\n\\nI came across your business (' + ($json.businessType || $json.category) + ') at ' + ($json.address || 'your listed location') + ' and wanted to reach out.\\n\\n[Write your pitch here.]\\n\\n---\\n' + $('Search Parameters').item.json.senderName + '\\n' + $('Search Parameters').item.json.senderPhysicalAddress + '\\n' + $('Search Parameters').item.json.unsubscribeInstructions }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "n8-compose-email",
+      "name": "Compose Email Content",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-80, -140]
+    },
+    {
+      "parameters": {
+        "amount": 20,
+        "unit": "seconds"
+      },
+      "id": "n9-throttle",
+      "name": "Throttle Between Sends",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [140, -140]
+    },
+    {
+      "parameters": {
+        "fromEmail": "REPLACE_WITH_YOUR_VERIFIED_SENDING_ADDRESS",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.emailSubject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.emailBody }}",
+        "options": {}
+      },
+      "id": "n10-send-email",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [360, -140],
+      "credentials": {
+        "smtp": {
+          "id": "SMTP_PLACEHOLDER_CREDENTIAL_ID",
+          "name": "SMTP_PLACEHOLDER_CREDENTIALS"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "SentLog",
+          "mode": "list",
+          "cachedResultName": "SentLog"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "n11-log-sent",
+      "name": "Log Sent Emails",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [580, -140]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [{ "node": "Search Parameters", "type": "main", "index": 0 }]
+      ]
+    },
+    "Search Parameters": {
+      "main": [
+        [{ "node": "Fetch Nearby Businesses", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch Nearby Businesses": {
+      "main": [
+        [{ "node": "Split Out Businesses", "type": "main", "index": 0 }]
+      ]
+    },
+    "Split Out Businesses": {
+      "main": [
+        [{ "node": "Has Email?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Has Email?": {
+      "main": [
+        [{ "node": "Not Already Sent", "type": "main", "index": 0 }],
+        [{ "node": "No-Email Leads Log", "type": "main", "index": 0 }]
+      ]
+    },
+    "Not Already Sent": {
+      "main": [
+        [{ "node": "Compose Email Content", "type": "main", "index": 0 }]
+      ]
+    },
+    "Compose Email Content": {
+      "main": [
+        [{ "node": "Throttle Between Sends", "type": "main", "index": 0 }]
+      ]
+    },
+    "Throttle Between Sends": {
+      "main": [
+        [{ "node": "Send Email", "type": "main", "index": 0 }]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        [{ "node": "Log Sent Emails", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
