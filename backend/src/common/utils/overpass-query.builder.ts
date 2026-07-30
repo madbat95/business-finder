@@ -1,4 +1,4 @@
-import { CATEGORY_TAGS } from '@shared/categories';
+import { CATEGORY_TAGS } from '@business-finder/shared';
 
 /**
  * Builds an Overpass QL query for the given categories around a point.

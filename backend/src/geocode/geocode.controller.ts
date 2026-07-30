@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import type { GeocodeResult } from '@shared/types';
+import type { GeocodeResult } from '@business-finder/shared';
 import { GeocodeQueryDto } from './dto/geocode-query.dto';
 import { GeocodeService } from './geocode.service';
 

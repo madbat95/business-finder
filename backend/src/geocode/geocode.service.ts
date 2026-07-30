@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { GeocodeResult } from '@shared/types';
+import type { GeocodeResult } from '@business-finder/shared';
 import { TtlCacheService } from '../common/cache/ttl-cache.service';
 import {
   GeocodeNotFoundError,

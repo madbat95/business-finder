@@ -1,4 +1,4 @@
-import type { PlaceResult } from '@shared/types';
+import type { PlaceResult } from '@business-finder/shared';
 
 export class PlaceResultDto implements PlaceResult {
   id!: string;

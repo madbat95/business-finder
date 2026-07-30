@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { BUSINESS_TYPE_TAG_KEYS, CATEGORY_TAGS } from '@shared/categories';
-import type { PlacesResponse } from '@shared/types';
+import { BUSINESS_TYPE_TAG_KEYS, CATEGORY_TAGS } from '@business-finder/shared';
+import type { PlacesResponse } from '@business-finder/shared';
 import { TtlCacheService } from '../common/cache/ttl-cache.service';
 import { haversineDistanceKm } from '../common/utils/distance.util';
 import { buildOverpassQuery } from '../common/utils/overpass-query.builder';

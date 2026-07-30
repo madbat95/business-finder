@@ -1,4 +1,4 @@
-import { CATEGORY_LABELS } from '@shared/categories';
+import { CATEGORY_LABELS } from '@business-finder/shared';
 import { PlaceResultDto } from '../../places/dto/place-result.dto';
 
 const CSV_COLUMNS = [

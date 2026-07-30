@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
-import type { PlacesResponse } from '@shared/types';
+import type { PlacesResponse } from '@business-finder/shared';
 import { placesToCsv } from '../common/utils/csv-serializer.util';
 import { PlacesExportQueryDto } from './dto/places-export-query.dto';
 import { PlacesRequestDto } from './dto/places-request.dto';

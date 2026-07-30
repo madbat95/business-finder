@@ -8,7 +8,7 @@ import {
   IsLongitude,
   IsNumber,
 } from 'class-validator';
-import { CATEGORY_TAGS } from '@shared/categories';
+import { CATEGORY_TAGS } from '@business-finder/shared';
 
 const KNOWN_CATEGORIES = Object.keys(CATEGORY_TAGS);
 

@@ -1,5 +1,5 @@
 {
-  "buildCommand": "",
+  "buildCommand": "cd ../shared && npm run build",
   "outputDirectory": "public",
   "rewrites": [
     { "source": "/(.*)", "destination": "/api" }
