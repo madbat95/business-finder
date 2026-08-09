@@ -1,14 +1,12 @@
 import { Transform } from 'class-transformer';
 import {
-  ArrayMinSize,
-  ArrayNotEmpty,
   IsArray,
   IsIn,
   IsLatitude,
   IsLongitude,
   IsNumber,
-  Max,
-  Min,
+  IsOptional,
+  IsString,
 } from 'class-validator';
 import { CATEGORY_TAGS } from '@business-finder/shared';
 
@@ -30,9 +28,17 @@ export class PlacesRequestDto {
   })
   radiusKm!: number;
 
+  // Optional/empty is allowed here -- a search can rely entirely on
+  // customCategories instead. PlacesService enforces "at least one of
+  // categories/customCategories must be non-empty" since that can't be
+  // expressed as a per-field DTO constraint.
+  @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
-  @ArrayMinSize(1)
   @IsIn(KNOWN_CATEGORIES, { each: true })
-  categories!: string[];
+  categories?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  customCategories?: string[];
 }

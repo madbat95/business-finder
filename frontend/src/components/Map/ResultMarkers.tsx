@@ -44,8 +44,24 @@ export default function ResultMarkers({ results, selected }: ResultMarkersProps)
         >
           <Popup>
             <p className="popup-title">{result.name}</p>
-            <p className="popup-detail">{CATEGORY_LABELS[result.category] ?? result.category}</p>
-            {result.address && <p className="popup-detail">{result.address}</p>}
+            <p className="popup-detail">
+              {CATEGORY_LABELS[result.category] ?? result.category} · {result.distanceKm.toFixed(1)} km
+            </p>
+            {result.businessType && <p className="popup-detail">🏷️ {result.businessType}</p>}
+            {result.address && <p className="popup-detail">📍 {result.address}</p>}
+            {result.phone && <p className="popup-detail">📞 {result.phone}</p>}
+            {result.email && (
+              <p className="popup-detail">
+                ✉️ <a href={`mailto:${result.email}`}>{result.email}</a>
+              </p>
+            )}
+            {result.website && (
+              <p className="popup-detail">
+                🔗 <a href={result.website} target="_blank" rel="noopener noreferrer">
+                  {result.website}
+                </a>
+              </p>
+            )}
           </Popup>
         </Marker>
       ))}

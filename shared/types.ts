@@ -23,6 +23,7 @@ export interface PlacesRequest {
   lon: number;
   radiusKm: number;
   categories: string[];
+  customCategories?: string[];
 }
 
 export interface PlacesResponse {
@@ -30,6 +31,7 @@ export interface PlacesResponse {
   radiusKm: number;
   results: PlaceResult[];
   count: number;
+  unmatchedCustomCategories: string[];
 }
 
 export interface ApiErrorBody {

@@ -1,12 +1,12 @@
 import { Transform } from 'class-transformer';
 import {
-  ArrayMinSize,
-  ArrayNotEmpty,
   IsArray,
   IsIn,
   IsLatitude,
   IsLongitude,
   IsNumber,
+  IsOptional,
+  IsString,
 } from 'class-validator';
 import { CATEGORY_TAGS } from '@business-finder/shared';
 
@@ -30,12 +30,21 @@ export class PlacesExportQueryDto {
   })
   radiusKm!: number;
 
+  // Optional/empty is allowed -- see PlacesRequestDto for why
+  // (customCategories-only searches must remain possible).
+  @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
-  @ArrayMinSize(1)
   @IsIn(KNOWN_CATEGORIES, { each: true })
   @Transform(({ value }) =>
     typeof value === 'string' ? value.split(',').map((v) => v.trim()) : value,
   )
-  categories!: string[];
+  categories?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.split(',').map((v) => v.trim()) : value,
+  )
+  customCategories?: string[];
 }

@@ -40,6 +40,7 @@ export interface PlacesResponse {
   radiusKm: number;
   results: PlaceResult[];
   count: number;
+  unmatchedCustomCategories: string[];
 }
 
 export interface PlacesRequest {
@@ -47,6 +48,7 @@ export interface PlacesRequest {
   lon: number;
   radiusKm: number;
   categories: string[];
+  customCategories?: string[];
 }
 
 async function parseErrorBody(res: Response): Promise<ApiErrorBody> {

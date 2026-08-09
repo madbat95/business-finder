@@ -4,7 +4,13 @@ import { searchPlaces, ApiError, type PlacesResponse } from '@/lib/api-client';
 interface UsePlacesSearchResult {
   searching: boolean;
   error: string | null;
-  search: (lat: number, lon: number, radiusKm: number, categories: string[]) => Promise<PlacesResponse | null>;
+  search: (
+    lat: number,
+    lon: number,
+    radiusKm: number,
+    categories: string[],
+    customCategories: string[],
+  ) => Promise<PlacesResponse | null>;
 }
 
 export function usePlacesSearch(): UsePlacesSearchResult {
@@ -12,11 +18,17 @@ export function usePlacesSearch(): UsePlacesSearchResult {
   const [error, setError] = useState<string | null>(null);
 
   const search = useCallback(
-    async (lat: number, lon: number, radiusKm: number, categories: string[]): Promise<PlacesResponse | null> => {
+    async (
+      lat: number,
+      lon: number,
+      radiusKm: number,
+      categories: string[],
+      customCategories: string[],
+    ): Promise<PlacesResponse | null> => {
       setError(null);
       setSearching(true);
       try {
-        const result = await searchPlaces({ lat, lon, radiusKm, categories });
+        const result = await searchPlaces({ lat, lon, radiusKm, categories, customCategories });
         return result;
       } catch (err) {
         if (err instanceof ApiError) {

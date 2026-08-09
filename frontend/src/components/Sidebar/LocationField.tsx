@@ -5,9 +5,11 @@ interface LocationFieldProps {
   onChange: (value: string) => void;
   onLocate: () => void;
   locating: boolean;
+  pinMode: boolean;
+  onTogglePin: () => void;
 }
 
-export default function LocationField({ value, onChange, onLocate, locating }: LocationFieldProps) {
+export default function LocationField({ value, onChange, onLocate, locating, pinMode, onTogglePin }: LocationFieldProps) {
   return (
     <div className="field-group">
       <label className="field-label" htmlFor="location-input">
@@ -24,6 +26,16 @@ export default function LocationField({ value, onChange, onLocate, locating }: L
         />
         <button
           type="button"
+          className={`locate-btn${pinMode ? ' active' : ''}`}
+          onClick={onTogglePin}
+          title="Click a point on the map to set the search center"
+          aria-label="Click a point on the map to set the search center"
+          aria-pressed={pinMode}
+        >
+          📍
+        </button>
+        <button
+          type="button"
           className="locate-btn"
           onClick={onLocate}
           disabled={locating}
@@ -33,6 +45,7 @@ export default function LocationField({ value, onChange, onLocate, locating }: L
           {locating ? '…' : '⌖'}
         </button>
       </div>
+      {pinMode && <p className="pin-mode-hint">Click anywhere on the map to set the search center.</p>}
     </div>
   );
 }

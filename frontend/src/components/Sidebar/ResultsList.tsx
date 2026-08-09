@@ -35,11 +35,12 @@ export default function ResultsList({ results, hasSearched, onSelect }: ResultsL
           <span className="result-tag">
             {CATEGORY_LABELS[result.category] ?? result.category} · {result.distanceKm.toFixed(1)} km
           </span>
-          {result.businessType && <p className="result-detail">{result.businessType}</p>}
-          {result.address && <p className="result-detail">{result.address}</p>}
-          {result.phone && <p className="result-detail">{result.phone}</p>}
+          {result.businessType && <p className="result-detail">🏷️ {result.businessType}</p>}
+          {result.address && <p className="result-detail">📍 {result.address}</p>}
+          {result.phone && <p className="result-detail">📞 {result.phone}</p>}
           {result.email && (
             <p className="result-detail">
+              ✉️{' '}
               <a href={`mailto:${result.email}`} onClick={(e) => e.stopPropagation()}>
                 {result.email}
               </a>
@@ -47,6 +48,7 @@ export default function ResultsList({ results, hasSearched, onSelect }: ResultsL
           )}
           {result.website && (
             <p className="result-detail">
+              🔗{' '}
               <a href={result.website} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                 {result.website}
               </a>
