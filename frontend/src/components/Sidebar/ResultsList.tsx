@@ -11,7 +11,11 @@ interface ResultsListProps {
 
 export default function ResultsList({ results, hasSearched, onSelect }: ResultsListProps) {
   if (!hasSearched) {
-    return null;
+    return (
+      <div className="results-empty">
+        Set a location and radius, then click "Search this area" to see nearby businesses here.
+      </div>
+    );
   }
 
   if (results.length === 0) {
@@ -31,29 +35,12 @@ export default function ResultsList({ results, hasSearched, onSelect }: ResultsL
             if (e.key === 'Enter' || e.key === ' ') onSelect(result.id);
           }}
         >
-          <p className="result-name">{result.name}</p>
-          <span className="result-tag">
-            {CATEGORY_LABELS[result.category] ?? result.category} · {result.distanceKm.toFixed(1)} km
-          </span>
-          {result.businessType && <p className="result-detail">🏷️ {result.businessType}</p>}
-          {result.address && <p className="result-detail">📍 {result.address}</p>}
-          {result.phone && <p className="result-detail">📞 {result.phone}</p>}
-          {result.email && (
-            <p className="result-detail">
-              ✉️{' '}
-              <a href={`mailto:${result.email}`} onClick={(e) => e.stopPropagation()}>
-                {result.email}
-              </a>
-            </p>
-          )}
-          {result.website && (
-            <p className="result-detail">
-              🔗{' '}
-              <a href={result.website} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                {result.website}
-              </a>
-            </p>
-          )}
+          <div className="result-card-top">
+            <p className="result-name">{result.name}</p>
+            <span className="result-distance">{result.distanceKm.toFixed(1)} km</span>
+          </div>
+          <p className="result-category">{CATEGORY_LABELS[result.category] ?? result.category}</p>
+          {result.address && <p className="result-address">{result.address}</p>}
         </div>
       ))}
     </div>

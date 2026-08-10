@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import CenterMarker from './CenterMarker';
 import ResultMarkers from './ResultMarkers';
+import MapLegend from './MapLegend';
 import type { PlaceResult } from '@/lib/api-client';
 import type { SelectedResult } from '@/hooks/useSelectedResult';
 
@@ -67,27 +68,30 @@ export default function MapView({ center, radiusKm, results, selected, searchTok
   const initialCenter: [number, number] = center ? [center.lat, center.lon] : HOUSTON;
 
   return (
-    <MapContainer
-      center={initialCenter}
-      zoom={DEFAULT_ZOOM}
-      className={`leaflet-container${pinMode ? ' pin-mode' : ''}`}
-      scrollWheelZoom
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {center && <CenterMarker lat={center.lat} lon={center.lon} radiusKm={radiusKm} />}
-      <ResultMarkers results={results} selected={selected} />
-      <MapEffects
-        center={center}
-        radiusKm={radiusKm}
-        results={results}
-        selected={selected}
-        searchToken={searchToken}
-        pinMode={pinMode}
-        onMapClick={onMapClick}
-      />
-    </MapContainer>
+    <>
+      <MapContainer
+        center={initialCenter}
+        zoom={DEFAULT_ZOOM}
+        className={`leaflet-container${pinMode ? ' pin-mode' : ''}`}
+        scrollWheelZoom
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {center && <CenterMarker lat={center.lat} lon={center.lon} radiusKm={radiusKm} />}
+        <ResultMarkers results={results} selected={selected} />
+        <MapEffects
+          center={center}
+          radiusKm={radiusKm}
+          results={results}
+          selected={selected}
+          searchToken={searchToken}
+          pinMode={pinMode}
+          onMapClick={onMapClick}
+        />
+      </MapContainer>
+      <MapLegend />
+    </>
   );
 }

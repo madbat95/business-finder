@@ -7,11 +7,9 @@ interface RadiusSliderProps {
 
 export default function RadiusSlider({ value, onChange }: RadiusSliderProps) {
   return (
-    <div className="field-group">
-      <label className="field-label" htmlFor="radius-input">
-        Search radius
-      </label>
-      <div className="radius-row">
+    <div className="pill-radius">
+      <div className="pill-radius-row">
+        <span className="pill-radius-label">Radius</span>
         <input
           id="radius-input"
           className="radius-slider"
@@ -23,6 +21,11 @@ export default function RadiusSlider({ value, onChange }: RadiusSliderProps) {
           onChange={(e) => onChange(Number(e.target.value))}
         />
         <span className="radius-value">{value} km</span>
+      </div>
+      <div className="pill-radius-scale">
+        <span>1 km</span>
+        <span>~15 mi</span>
+        <span>100 km</span>
       </div>
     </div>
   );
