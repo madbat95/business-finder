@@ -2,10 +2,11 @@
 
 import dynamic from 'next/dynamic';
 import { useCallback, useMemo, useState } from 'react';
+import { Download, Loader2 } from 'lucide-react';
 import LocationField from '@/components/Sidebar/LocationField';
 import RadiusSlider from '@/components/Sidebar/RadiusSlider';
-import CategoryCheckboxes from '@/components/Sidebar/CategoryCheckboxes';
-import CustomCategoryInput from '@/components/Sidebar/CustomCategoryInput';
+import CategoryPills from '@/components/Sidebar/CategoryPills';
+import CustomCategoryChips from '@/components/Sidebar/CustomCategoryChips';
 import StatusBar, { type StatusKind } from '@/components/Sidebar/StatusBar';
 import ResultsList from '@/components/Sidebar/ResultsList';
 import { useGeocode } from '@/hooks/useGeocode';
@@ -32,18 +33,11 @@ interface LastSearchParams {
   customCategories: string[];
 }
 
-function parseCustomCategories(input: string): string[] {
-  return input
-    .split(',')
-    .map((term) => term.trim())
-    .filter(Boolean);
-}
-
 export default function SearchPage() {
   const [locationInput, setLocationInput] = useState(DEFAULT_LOCATION);
   const [radiusKm, setRadiusKm] = useState(DEFAULT_RADIUS);
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
-  const [customCategoriesInput, setCustomCategoriesInput] = useState('');
+  const [customCategoryChips, setCustomCategoryChips] = useState<string[]>([]);
   const [center, setCenter] = useState<{ lat: number; lon: number } | null>(null);
   const [results, setResults] = useState<PlaceResult[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
@@ -51,10 +45,7 @@ export default function SearchPage() {
   const [locating, setLocating] = useState(false);
   const [pinMode, setPinMode] = useState(false);
   const [lastSearchParams, setLastSearchParams] = useState<LastSearchParams | null>(null);
-  const [status, setStatus] = useState<Status>({
-    message: 'Enter a location and click Search to find nearby businesses.',
-    kind: 'info',
-  });
+  const [status, setStatus] = useState<Status | null>(null);
 
   const { resolving, resolveLocation } = useGeocode();
   const { searching, search } = usePlacesSearch();
@@ -92,13 +83,18 @@ export default function SearchPage() {
     setPinMode(false);
   }, []);
 
+  const handleResetFilters = useCallback(() => {
+    setCategories([]);
+    setRadiusKm(DEFAULT_RADIUS);
+    setCustomCategoryChips([]);
+  }, []);
+
   const handleSearch = useCallback(async () => {
     if (!locationInput.trim()) {
       setStatus({ message: 'Please enter a location.', kind: 'error' });
       return;
     }
-    const customCategories = parseCustomCategories(customCategoriesInput);
-    if (categories.length === 0 && customCategories.length === 0) {
+    if (categories.length === 0 && customCategoryChips.length === 0) {
       setStatus({ message: 'Please select at least one category or enter a custom category.', kind: 'error' });
       return;
     }
@@ -115,7 +111,7 @@ export default function SearchPage() {
     setCenter(nextCenter);
     setStatus({ message: 'Searching this area…', kind: 'info' });
 
-    const placesResult = await search(nextCenter.lat, nextCenter.lon, radiusKm, categories, customCategories);
+    const placesResult = await search(nextCenter.lat, nextCenter.lon, radiusKm, categories, customCategoryChips);
     if (!placesResult) {
       setStatus({ message: 'Something went wrong while searching. Please try again.', kind: 'error' });
       return;
@@ -129,7 +125,7 @@ export default function SearchPage() {
       lon: nextCenter.lon,
       radiusKm,
       categories,
-      customCategories,
+      customCategories: customCategoryChips,
     });
 
     const unmatchedNote =
@@ -148,9 +144,7 @@ export default function SearchPage() {
         kind: 'success',
       });
     }
-  }, [locationInput, categories, customCategoriesInput, radiusKm, resolveLocation, search]);
-
-  const searchButtonLabel = useMemo(() => (busy ? 'Searching…' : 'Search this area'), [busy]);
+  }, [locationInput, categories, customCategoryChips, radiusKm, resolveLocation, search]);
 
   const exportUrl = useMemo(() => {
     if (!lastSearchParams || results.length === 0) return null;
@@ -170,46 +164,6 @@ export default function SearchPage() {
 
   return (
     <div className="app-layout">
-      <aside className="sidebar">
-        <div className="sidebar-scroll">
-          <div>
-            <p className="eyebrow">OpenStreetMap</p>
-            <h1 className="app-title">Nearby Business Finder</h1>
-            <p className="app-description">
-              Search any location worldwide to find nearby businesses and utilities within a set radius.
-            </p>
-          </div>
-
-          <LocationField
-            value={locationInput}
-            onChange={setLocationInput}
-            onLocate={handleLocate}
-            locating={locating}
-            pinMode={pinMode}
-            onTogglePin={handleTogglePin}
-          />
-
-          <RadiusSlider value={radiusKm} onChange={setRadiusKm} />
-
-          <CategoryCheckboxes selected={categories} onChange={setCategories} />
-
-          <CustomCategoryInput value={customCategoriesInput} onChange={setCustomCategoriesInput} />
-
-          <button type="button" className="search-btn" onClick={handleSearch} disabled={busy}>
-            {searchButtonLabel}
-          </button>
-
-          <StatusBar message={status.message} kind={status.kind} />
-
-          {exportUrl && (
-            <a className="export-btn" href={exportUrl} download>
-              Export CSV
-            </a>
-          )}
-
-          <ResultsList results={results} hasSearched={hasSearched} onSelect={select} />
-        </div>
-      </aside>
       <div className="map-container">
         <MapView
           center={center}
@@ -221,6 +175,59 @@ export default function SearchPage() {
           onMapClick={handleMapClick}
         />
       </div>
+
+      <div className="search-pill">
+        <LocationField
+          value={locationInput}
+          onChange={setLocationInput}
+          onLocate={handleLocate}
+          locating={locating}
+          pinMode={pinMode}
+          onTogglePin={handleTogglePin}
+        />
+        <div className="pill-divider" />
+        <RadiusSlider value={radiusKm} onChange={setRadiusKm} />
+      </div>
+
+      {status && (
+        <div className="floating-status">
+          <StatusBar message={status.message} kind={status.kind} />
+        </div>
+      )}
+
+      <div className="filter-row">
+        <CategoryPills selected={categories} onChange={setCategories} />
+        <CustomCategoryChips chips={customCategoryChips} onChange={setCustomCategoryChips} />
+        <button type="button" className="reset-filters-link" onClick={handleResetFilters}>
+          Reset filters
+        </button>
+      </div>
+
+      <button type="button" className="search-btn" onClick={handleSearch} disabled={busy}>
+        {busy && <Loader2 size={14} className="spin" />}
+        {busy ? 'Searching…' : 'Search this area'}
+      </button>
+
+      {hasSearched && (
+        <div className="results-count">
+          {results.length} result{results.length === 1 ? '' : 's'}
+        </div>
+      )}
+
+      <aside className="results-rail">
+        <div className="results-rail-header">
+          <span className="results-rail-title">Results</span>
+          {exportUrl && (
+            <a className="export-link" href={exportUrl} download>
+              <Download size={13} />
+              Export CSV
+            </a>
+          )}
+        </div>
+        <div className="results-rail-body">
+          <ResultsList results={results} hasSearched={hasSearched} onSelect={select} />
+        </div>
+      </aside>
     </div>
   );
 }

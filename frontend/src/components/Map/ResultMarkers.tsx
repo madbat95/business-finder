@@ -14,9 +14,9 @@ interface ResultMarkersProps {
 
 const resultIcon = L.divIcon({
   className: '',
-  html: '<div class="marker-diamond result"></div>',
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
+  html: '<div class="marker-dot result"></div>',
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
 });
 
 export default function ResultMarkers({ results, selected }: ResultMarkersProps) {
@@ -47,21 +47,7 @@ export default function ResultMarkers({ results, selected }: ResultMarkersProps)
             <p className="popup-detail">
               {CATEGORY_LABELS[result.category] ?? result.category} · {result.distanceKm.toFixed(1)} km
             </p>
-            {result.businessType && <p className="popup-detail">🏷️ {result.businessType}</p>}
-            {result.address && <p className="popup-detail">📍 {result.address}</p>}
-            {result.phone && <p className="popup-detail">📞 {result.phone}</p>}
-            {result.email && (
-              <p className="popup-detail">
-                ✉️ <a href={`mailto:${result.email}`}>{result.email}</a>
-              </p>
-            )}
-            {result.website && (
-              <p className="popup-detail">
-                🔗 <a href={result.website} target="_blank" rel="noopener noreferrer">
-                  {result.website}
-                </a>
-              </p>
-            )}
+            {result.address && <p className="popup-detail">{result.address}</p>}
           </Popup>
         </Marker>
       ))}
