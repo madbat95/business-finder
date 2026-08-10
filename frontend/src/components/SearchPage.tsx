@@ -44,6 +44,7 @@ export default function SearchPage() {
   const [searchToken, setSearchToken] = useState(0);
   const [locating, setLocating] = useState(false);
   const [pinMode, setPinMode] = useState(false);
+  const [controlsExpanded, setControlsExpanded] = useState(true);
   const [lastSearchParams, setLastSearchParams] = useState<LastSearchParams | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
 
@@ -75,6 +76,10 @@ export default function SearchPage() {
 
   const handleTogglePin = useCallback(() => {
     setPinMode((armed) => !armed);
+  }, []);
+
+  const handleToggleControls = useCallback(() => {
+    setControlsExpanded((expanded) => !expanded);
   }, []);
 
   const handleMapClick = useCallback((lat: number, lon: number) => {
@@ -176,31 +181,41 @@ export default function SearchPage() {
         />
       </div>
 
-      <div className="search-pill">
-        <LocationField
-          value={locationInput}
-          onChange={setLocationInput}
-          onLocate={handleLocate}
-          locating={locating}
-          pinMode={pinMode}
-          onTogglePin={handleTogglePin}
-        />
-        <div className="pill-divider" />
-        <RadiusSlider value={radiusKm} onChange={setRadiusKm} />
-      </div>
-
-      {status && (
-        <div className="floating-status">
-          <StatusBar message={status.message} kind={status.kind} />
+      <div className="top-controls">
+        <div className="search-pill">
+          <LocationField
+            value={locationInput}
+            onChange={setLocationInput}
+            onLocate={handleLocate}
+            locating={locating}
+            pinMode={pinMode}
+            onTogglePin={handleTogglePin}
+            controlsExpanded={controlsExpanded}
+            onToggleControls={handleToggleControls}
+          />
+          {controlsExpanded && (
+            <>
+              <div className="pill-divider" />
+              <RadiusSlider value={radiusKm} onChange={setRadiusKm} />
+            </>
+          )}
         </div>
-      )}
 
-      <div className="filter-row">
-        <CategoryPills selected={categories} onChange={setCategories} />
-        <CustomCategoryChips chips={customCategoryChips} onChange={setCustomCategoryChips} />
-        <button type="button" className="reset-filters-link" onClick={handleResetFilters}>
-          Reset filters
-        </button>
+        {status && (
+          <div className="floating-status">
+            <StatusBar message={status.message} kind={status.kind} />
+          </div>
+        )}
+
+        {controlsExpanded && (
+          <div className="filter-row">
+            <CategoryPills selected={categories} onChange={setCategories} />
+            <CustomCategoryChips chips={customCategoryChips} onChange={setCustomCategoryChips} />
+            <button type="button" className="reset-filters-link" onClick={handleResetFilters}>
+              Reset filters
+            </button>
+          </div>
+        )}
       </div>
 
       <button type="button" className="search-btn" onClick={handleSearch} disabled={busy}>

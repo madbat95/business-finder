@@ -560,26 +560,37 @@ body {
   margin: 2px 0;
 }
 
-/* Mobile: 780px breakpoint */
+/* Mobile: 780px breakpoint.
+   .top-controls itself becomes the one positioned/stacking element; its
+   children (search pill, status, filter row) drop back to normal flow
+   with a gap between them, so the stack's total height always matches
+   whatever is actually shown/hidden (e.g. the collapse toggle, or no
+   status message) instead of relying on hand-guessed pixel offsets per
+   element, which broke the first time actual content didn't match the
+   assumed height. */
 @media (max-width: 780px) {
-  .search-pill {
+  .top-controls {
+    position: absolute;
     top: 12px;
     left: 12px;
     right: 12px;
-    width: auto;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
-  .floating-status {
-    top: 142px;
-    left: 12px;
-    right: 12px;
+  .search-pill,
+  .floating-status,
+  .filter-row {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
     width: auto;
   }
 
   .filter-row {
-    top: 182px;
-    left: 12px;
-    right: 12px;
     max-width: none;
     overflow-x: auto;
     flex-wrap: nowrap;

@@ -1,6 +1,6 @@
 'use client';
 
-import { Locate, MapPin, Search } from 'lucide-react';
+import { ChevronDown, ChevronUp, Locate, MapPin, Search } from 'lucide-react';
 
 interface LocationFieldProps {
   value: string;
@@ -9,9 +9,20 @@ interface LocationFieldProps {
   locating: boolean;
   pinMode: boolean;
   onTogglePin: () => void;
+  controlsExpanded: boolean;
+  onToggleControls: () => void;
 }
 
-export default function LocationField({ value, onChange, onLocate, locating, pinMode, onTogglePin }: LocationFieldProps) {
+export default function LocationField({
+  value,
+  onChange,
+  onLocate,
+  locating,
+  pinMode,
+  onTogglePin,
+  controlsExpanded,
+  onToggleControls,
+}: LocationFieldProps) {
   return (
     <div className="pill-row">
       <Search size={16} className="pill-icon" aria-hidden="true" />
@@ -42,6 +53,16 @@ export default function LocationField({ value, onChange, onLocate, locating, pin
         aria-label="Use my location"
       >
         <Locate size={16} />
+      </button>
+      <button
+        type="button"
+        className="pill-icon-btn"
+        onClick={onToggleControls}
+        title={controlsExpanded ? 'Collapse search controls' : 'Expand search controls'}
+        aria-label={controlsExpanded ? 'Collapse search controls' : 'Expand search controls'}
+        aria-expanded={controlsExpanded}
+      >
+        {controlsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </button>
     </div>
   );
