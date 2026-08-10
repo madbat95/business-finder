@@ -9,6 +9,7 @@ import CategoryPills from '@/components/Sidebar/CategoryPills';
 import CustomCategoryChips from '@/components/Sidebar/CustomCategoryChips';
 import StatusBar, { type StatusKind } from '@/components/Sidebar/StatusBar';
 import ResultsList from '@/components/Sidebar/ResultsList';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { useGeocode } from '@/hooks/useGeocode';
 import { usePlacesSearch } from '@/hooks/usePlacesSearch';
 import { useSelectedResult } from '@/hooks/useSelectedResult';
@@ -45,7 +46,7 @@ export default function SearchPage() {
   const [locating, setLocating] = useState(false);
   const [pinMode, setPinMode] = useState(false);
   const [controlsExpanded, setControlsExpanded] = useState(true);
-  const [resultsExpanded, setResultsExpanded] = useState(true);
+  const [resultsOpen, setResultsOpen] = useState(false);
   const [lastSearchParams, setLastSearchParams] = useState<LastSearchParams | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
 
@@ -81,10 +82,6 @@ export default function SearchPage() {
 
   const handleToggleControls = useCallback(() => {
     setControlsExpanded((expanded) => !expanded);
-  }, []);
-
-  const handleToggleResults = useCallback(() => {
-    setResultsExpanded((expanded) => !expanded);
   }, []);
 
   const handleMapClick = useCallback((lat: number, lon: number) => {
@@ -130,6 +127,7 @@ export default function SearchPage() {
     setResults(placesResult.results);
     setHasSearched(true);
     setSearchToken((t) => t + 1);
+    setResultsOpen(true);
     setLastSearchParams({
       lat: nextCenter.lat,
       lon: nextCenter.lon,
@@ -229,21 +227,13 @@ export default function SearchPage() {
       </button>
 
       {hasSearched && (
-        <div className="results-count">
+        <button type="button" className="results-count" onClick={() => setResultsOpen(true)}>
           {results.length} result{results.length === 1 ? '' : 's'}
-        </div>
+        </button>
       )}
 
-      <aside className={`results-rail${resultsExpanded ? '' : ' collapsed'}`}>
-        <button
-          type="button"
-          className="results-drag-handle"
-          onClick={handleToggleResults}
-          aria-label={resultsExpanded ? 'Collapse results' : 'Expand results'}
-          aria-expanded={resultsExpanded}
-        >
-          <span className="drag-handle-bar" />
-        </button>
+      {/* Desktop: persistent side rail (unaffected by the mobile drawer below). */}
+      <aside className="results-rail">
         <div className="results-rail-header">
           <span className="results-rail-title">Results</span>
           {exportUrl && (
@@ -257,6 +247,26 @@ export default function SearchPage() {
           <ResultsList results={results} hasSearched={hasSearched} onSelect={select} />
         </div>
       </aside>
+
+      {/* Mobile: a real bottom-sheet drawer (shadcn/Base UI) instead of a
+          hand-rolled always-peeking panel -- opens on demand via the
+          results-count badge or automatically once a search completes. */}
+      <Drawer open={resultsOpen} onOpenChange={setResultsOpen} showSwipeHandle>
+        <DrawerContent className="results-drawer-content">
+          <DrawerHeader className="results-drawer-header">
+            <DrawerTitle className="results-rail-title">Results</DrawerTitle>
+            {exportUrl && (
+              <a className="export-link" href={exportUrl} download>
+                <Download size={13} />
+                Export CSV
+              </a>
+            )}
+          </DrawerHeader>
+          <div className="results-rail-body">
+            <ResultsList results={results} hasSearched={hasSearched} onSelect={select} />
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
