@@ -35,6 +35,7 @@ interface MapEffectsProps {
 function MapEffects({ center, radiusKm, results, selected, searchToken, pinMode, onMapClick }: MapEffectsProps) {
   const map = useMap();
   const lastSearchToken = useRef<number>(0);
+  const lastCenterKey = useRef<string | null>(null);
 
   // Only listens while pinMode is armed -- clicking to place a new search
   // center is opt-in so normal map panning/zooming isn't disrupted.
@@ -43,7 +44,23 @@ function MapEffects({ center, radiusKm, results, selected, searchToken, pinMode,
     onMapClick(e.latlng.lat, e.latlng.lng);
   });
 
-  // Fit bounds to the search circle whenever a new search completes.
+  // Pan to the center the moment it changes -- locate-me, a map click, or a
+  // search resolving a new location -- rather than waiting for a search to
+  // finish. Otherwise, if the subsequent search fails (e.g. a rate-limited
+  // Overpass call), the pin ends up placed somewhere off-screen with no way
+  // for the user to see it moved at all.
+  useEffect(() => {
+    if (!center) return;
+    const key = `${center.lat},${center.lon}`;
+    if (key === lastCenterKey.current) return;
+    lastCenterKey.current = key;
+
+    const bounds = L.latLng(center.lat, center.lon).toBounds(radiusKm * 1000 * 2);
+    map.fitBounds(bounds, { padding: [24, 24] });
+  }, [center, radiusKm, map]);
+
+  // Re-fit bounds whenever a search completes, even if the center didn't
+  // change (e.g. re-searching the same location with a different radius).
   useEffect(() => {
     if (!center) return;
     if (searchToken === lastSearchToken.current) return;

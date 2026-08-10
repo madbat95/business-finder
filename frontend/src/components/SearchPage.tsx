@@ -45,6 +45,7 @@ export default function SearchPage() {
   const [locating, setLocating] = useState(false);
   const [pinMode, setPinMode] = useState(false);
   const [controlsExpanded, setControlsExpanded] = useState(true);
+  const [resultsExpanded, setResultsExpanded] = useState(true);
   const [lastSearchParams, setLastSearchParams] = useState<LastSearchParams | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
 
@@ -80,6 +81,10 @@ export default function SearchPage() {
 
   const handleToggleControls = useCallback(() => {
     setControlsExpanded((expanded) => !expanded);
+  }, []);
+
+  const handleToggleResults = useCallback(() => {
+    setResultsExpanded((expanded) => !expanded);
   }, []);
 
   const handleMapClick = useCallback((lat: number, lon: number) => {
@@ -229,7 +234,16 @@ export default function SearchPage() {
         </div>
       )}
 
-      <aside className="results-rail">
+      <aside className={`results-rail${resultsExpanded ? '' : ' collapsed'}`}>
+        <button
+          type="button"
+          className="results-drag-handle"
+          onClick={handleToggleResults}
+          aria-label={resultsExpanded ? 'Collapse results' : 'Expand results'}
+          aria-expanded={resultsExpanded}
+        >
+          <span className="drag-handle-bar" />
+        </button>
         <div className="results-rail-header">
           <span className="results-rail-title">Results</span>
           {exportUrl && (
